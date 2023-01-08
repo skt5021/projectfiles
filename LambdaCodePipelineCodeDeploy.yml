@@ -1,0 +1,383 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+  Generator: "former2"
+Description: ""
+Resources:
+  LambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Description: ""
+      FunctionName: "test"
+      Handler: "lambda_function.lambda_handler"
+      Architectures: 
+      - "x86_64"
+      Code: 
+        S3Bucket: !Sub "awslambda-${AWS::Region}-tasks"
+        S3Key: !Sub "/snapshots/${AWS::AccountId}/test-a28a3908-f177-4736-9fee-1cce2896a1df"
+        S3ObjectVersion: "6mPXdpXTGG62nAMXNpEINup8IZPfEQao"
+      MemorySize: 128
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/FlashCards-Lambda-Refresh-role-gp6ylvoi"
+      Runtime: "python3.9"
+      Timeout: 3
+      TracingConfig: 
+        Mode: "PassThrough"
+      EphemeralStorage: 
+        Size: 512
+
+  LambdaFunction2:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Description: ""
+      FunctionName: "flashcards-s3-trigger"
+      Handler: "index.handler"
+      Architectures: 
+      - "x86_64"
+      Code: 
+        S3Bucket: !Sub "awslambda-${AWS::Region}-tasks"
+        S3Key: !Sub "/snapshots/${AWS::AccountId}/flashcards-s3-trigger-95a0b163-f77b-4ca1-8621-6cb93f707435"
+        S3ObjectVersion: "D7t6MMuDg73vom5I_Nymu1c4P_TzvQ6T"
+      MemorySize: 128
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/s3trigger"
+      Runtime: "nodejs16.x"
+      Timeout: 3
+      TracingConfig: 
+        Mode: "PassThrough"
+      EphemeralStorage: 
+        Size: 512
+
+  LambdaFunction3:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Description: ""
+      FunctionName: "FlashCards-Lambda-Deploy"
+      Handler: "lambda_function.lambda_handler"
+      Architectures: 
+      - "x86_64"
+      Code: 
+        S3Bucket: !Sub "awslambda-${AWS::Region}-tasks"
+        S3Key: !Sub "/snapshots/${AWS::AccountId}/FlashCards-Lambda-Deploy-bb9cb19f-c855-4e57-9b49-94bde3295414"
+        S3ObjectVersion: "FB30R9Jpeotuok5z9UyB9DJeHYFn0b3U"
+      MemorySize: 128
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/FlashCards-Lambda-Deploy-role-f3wvciqr"
+      Runtime: "python3.9"
+      Timeout: 3
+      TracingConfig: 
+        Mode: "PassThrough"
+      EphemeralStorage: 
+        Size: 512
+
+  LambdaFunction4:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Description: "An Amazon S3 trigger that retrieves metadata for the object that has been updated."
+      FunctionName: !Sub "${LambdaFunction5}-p"
+      Handler: "lambda_function.lambda_handler"
+      Architectures: 
+      - "x86_64"
+      Code: 
+        S3Bucket: !Sub "awslambda-${AWS::Region}-tasks"
+        S3Key: !Sub "/snapshots/${AWS::AccountId}/${LambdaFunction5}-p-8ffa9568-d38e-4274-8230-5fe7257a0414"
+        S3ObjectVersion: "nHrZtSYYk7YK1C2ytVpY2kcesfrP3_Kx"
+      MemorySize: 128
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/${LambdaFunction5}-p-role"
+      Runtime: "python3.7"
+      Timeout: 3
+      TracingConfig: 
+        Mode: "PassThrough"
+      EphemeralStorage: 
+        Size: 512
+      Tags: 
+      - 
+        Key: "lambda-console:blueprint"
+        Value: "s3-get-object-python"
+
+  LambdaFunction5:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Description: "An Amazon S3 trigger that retrieves metadata for the object that has been updated."
+      FunctionName: "lambda-s3-function"
+      Handler: "index.handler"
+      Architectures: 
+      - "x86_64"
+      Code: 
+        S3Bucket: !Sub "awslambda-${AWS::Region}-tasks"
+        S3Key: !Sub "/snapshots/${AWS::AccountId}/lambda-s3-function-47663019-9186-4e53-852a-88f14cdc0995"
+        S3ObjectVersion: "Zd.nARqZ1_T7Yz5wcV6x5absNzLKDv0n"
+      MemorySize: 128
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/my-s3-function-role"
+      Runtime: "nodejs18.x"
+      Timeout: 3
+      TracingConfig: 
+        Mode: "PassThrough"
+      EphemeralStorage: 
+        Size: 512
+      Tags: 
+      - 
+        Key: "lambda-console:blueprint"
+        Value: "s3-get-object"
+
+  LambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt LambdaFunction3.Arn
+      Principal: "sns.amazonaws.com"
+      SourceArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:codestar-notifications-FlashCards"
+
+  LambdaPermission2:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt LambdaFunction2.Arn
+      Principal: "s3.amazonaws.com"
+      SourceArn: "arn:aws:s3:::prod-bucket-team1"
+
+  CodePipelinePipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: "FlashCards-02"
+      RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/AWSCodePipelineServiceRole-${AWS::Region}-FlashCards"
+      ArtifactStore: 
+        Location: !Sub "codepipeline-${AWS::Region}-890199704765"
+        Type: "S3"
+      Stages: 
+      - 
+        Name: "Source"
+        Actions: 
+        - 
+          Name: "Source"
+          ActionTypeId: 
+            Category: "Source"
+            Owner: "AWS"
+            Provider: "CodeStarSourceConnection"
+            Version: "1"
+          Configuration: 
+            BranchName: "main"
+            ConnectionArn: !Sub "arn:aws:codestar-connections:${AWS::Region}:${AWS::AccountId}:connection/e8076d68-d874-4c77-8fba-3dfff7d88a5f"
+            FullRepositoryId: "alvv4240/FlashCards"
+            OutputArtifactFormat: "CODE_ZIP"
+          OutputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "SourceVariables"
+          RunOrder: 1
+      - 
+        Name: "Deploy"
+        Actions: 
+        - 
+          Name: "Deploy"
+          ActionTypeId: 
+            Category: "Deploy"
+            Owner: "AWS"
+            Provider: "S3"
+            Version: "1"
+          Configuration: 
+            BucketName: "prod-bucket-team1"
+            Extract: "true"
+            ObjectKey: "FlashCards"
+          InputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "DeployVariables"
+          RunOrder: 1
+
+  CodePipelinePipeline2:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: "FlashCards-03"
+      RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/AWSCodePipelineServiceRole-${AWS::Region}-FlashCards-03"
+      ArtifactStore: 
+        Location: "artifact-bucket-team1"
+        Type: "S3"
+      Stages: 
+      - 
+        Name: "Source"
+        Actions: 
+        - 
+          Name: "Source"
+          ActionTypeId: 
+            Category: "Source"
+            Owner: "AWS"
+            Provider: "CodeStarSourceConnection"
+            Version: "1"
+          Configuration: 
+            BranchName: "main"
+            ConnectionArn: !Sub "arn:aws:codestar-connections:${AWS::Region}:${AWS::AccountId}:connection/e8076d68-d874-4c77-8fba-3dfff7d88a5f"
+            FullRepositoryId: "alvv4240/FlashCards"
+            OutputArtifactFormat: "CODE_ZIP"
+          OutputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "SourceVariables"
+          RunOrder: 1
+      - 
+        Name: "Deploy"
+        Actions: 
+        - 
+          Name: "Deploy"
+          ActionTypeId: 
+            Category: "Deploy"
+            Owner: "AWS"
+            Provider: "S3"
+            Version: "1"
+          Configuration: 
+            BucketName: "prod-bucket-team1"
+            Extract: "true"
+            ObjectKey: "FlashCards"
+          InputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "DeployVariables"
+          RunOrder: 1
+
+  CodePipelinePipeline3:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: "FlashCards-deployment"
+      RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/AWSCodePipelineServiceRole-${AWS::Region}-FlashCards-deployment"
+      ArtifactStore: 
+        Location: !Sub "codepipeline-${AWS::Region}-890199704765"
+        Type: "S3"
+      Stages: 
+      - 
+        Name: "Source"
+        Actions: 
+        - 
+          Name: "Source"
+          ActionTypeId: 
+            Category: "Source"
+            Owner: "AWS"
+            Provider: "CodeStarSourceConnection"
+            Version: "1"
+          Configuration: 
+            BranchName: "main"
+            ConnectionArn: !Sub "arn:aws:codestar-connections:${AWS::Region}:${AWS::AccountId}:connection/e8076d68-d874-4c77-8fba-3dfff7d88a5f"
+            FullRepositoryId: "alvv4240/FlashCards"
+            OutputArtifactFormat: "CODE_ZIP"
+          OutputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "SourceVariables"
+          RunOrder: 1
+      - 
+        Name: "Deploy"
+        Actions: 
+        - 
+          Name: "Deploy"
+          ActionTypeId: 
+            Category: "Deploy"
+            Owner: "AWS"
+            Provider: "S3"
+            Version: "1"
+          Configuration: 
+            BucketName: "codezipfilebucket"
+            Extract: "false"
+            ObjectKey: "FlashCards"
+          InputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "DeployVariables"
+          RunOrder: 1
+      - 
+        Name: "Build"
+        Actions: 
+        - 
+          Name: "lambda"
+          ActionTypeId: 
+            Category: "Invoke"
+            Owner: "AWS"
+            Provider: "Lambda"
+            Version: "1"
+          Configuration: 
+            FunctionName: !Ref LambdaFunction2
+          InputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          RunOrder: 1
+
+  CodePipelinePipeline4:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: "Iac"
+      RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/IaC"
+      ArtifactStore: 
+        Location: "artifact-bucket-team1"
+        Type: "S3"
+      Stages: 
+      - 
+        Name: "Source"
+        Actions: 
+        - 
+          Name: "Source"
+          ActionTypeId: 
+            Category: "Source"
+            Owner: "AWS"
+            Provider: "CodeStarSourceConnection"
+            Version: "1"
+          Configuration: 
+            BranchName: "main"
+            ConnectionArn: !Sub "arn:aws:codestar-connections:${AWS::Region}:${AWS::AccountId}:connection/5dc4bebd-cbd2-42f4-b447-7aabcb658f47"
+            FullRepositoryId: "alvv4240/project_IaC"
+            OutputArtifactFormat: "CODE_ZIP"
+          OutputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "SourceVariables"
+          RunOrder: 1
+      - 
+        Name: "Deploy"
+        Actions: 
+        - 
+          Name: "Deploy"
+          ActionTypeId: 
+            Category: "Deploy"
+            Owner: "AWS"
+            Provider: "S3"
+            Version: "1"
+          Configuration: 
+            BucketName: "prod-bucket-team1"
+            Extract: "true"
+            ObjectKey: "IaC"
+          InputArtifacts: 
+          - 
+            Name: "SourceArtifact"
+          Region: !Ref AWS::Region
+          Namespace: "DeployVariables"
+          RunOrder: 1
+
+  CodeDeployApplication:
+    Type: "AWS::CodeDeploy::Application"
+    Properties:
+      ApplicationName: "FlashCards-CD-App"
+      ComputePlatform: "Server"
+
+  CodeDeployDeploymentGroup:
+    Type: "AWS::CodeDeploy::DeploymentGroup"
+    Properties:
+      ApplicationName: !Ref CodeDeployApplication
+      DeploymentGroupName: "FlashCards-CD-DG"
+      DeploymentConfigName: "CodeDeployDefault.OneAtATime"
+      ServiceRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/FlashCards-CD-Role"
+      AutoScalingGroups: 
+      - "FlashCards-ECSAS-Public"
+      AlarmConfiguration: 
+        Enabled: false
+        IgnorePollAlarmFailure: false
+      DeploymentStyle: 
+        DeploymentType: "IN_PLACE"
+        DeploymentOption: "WITH_TRAFFIC_CONTROL"
+      LoadBalancerInfo: 
+        TargetGroupInfoList: 
+        - 
+          Name: "FlashCards-TG-Instance"
+      Ec2TagSet: {}
+      OnPremisesTagSet: {}
+
