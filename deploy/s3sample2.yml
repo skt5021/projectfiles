@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Resources:
+    S3BucketSample:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            BucketName: "artifact-bucket-team1sample"
+
+    S3Bucket2Sample:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            BucketName: "prod-bucket-team1sample"
