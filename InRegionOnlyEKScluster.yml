@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+  Generator: "former2"
+Description: ""
+Resources:
+  EKSCluster:
+    Type: "AWS::EKS::Cluster"
+    Properties:
+      Name: "eks-clusterTEST"
+      RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/eks-cluster-role"
+      Version: "1.24"
+      ResourcesVpcConfig: 
+        SecurityGroupIds: 
+        - "sg-01cd151fa2e32d301"
+        SubnetIds: 
+        - "subnet-06fa3aa3c665793de"
+        - "subnet-069444c9c9153ac30"
+        - "subnet-05c991e9885ea0ef0"
+        - "subnet-0ca6c1d4db50497fd"
+      KubernetesNetworkConfig: 
+        ServiceIpv4Cidr: "10.100.0.0/16"

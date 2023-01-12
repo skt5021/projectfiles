@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  Generator: former2
+Description: ''
+Resources:
+  CodeDeployApplication:
+    Type: 'AWS::CodeDeploy::Application'
+    Properties:
+      ApplicationName: FlashCards-CD-App
+      ComputePlatform: Server
